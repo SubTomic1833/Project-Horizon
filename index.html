@@ -3,343 +3,350 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Project Horizon - Advanced Flight Deck</title>
+    <title>Project Horizon - Glass Cockpit PFD</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@500;700&family=Share+Tech+Mono&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@600;700&family=Share+Tech+Mono&display=swap" rel="stylesheet">
     
     <style>
         :root {
-            --neon-cyan: #06b6d4;
-            --neon-green: #10b981;
-            --neon-red: #ef4444;
-            --glass-bg: rgba(30, 41, 59, 0.45);
-            --glass-border: rgba(255, 255, 255, 0.08);
+            --neon-cyan: #00f3ff;
+            --neon-green: #00ff66;
+            --neon-magenta: #ff00ff;
+            --glass-panel: rgba(15, 23, 42, 0.75);
         }
 
         body {
-            background: radial-gradient(circle at center, #1e1b4b 0%, #0f0a1e 100%);
+            background-color: #05050a;
             color: #f8fafc;
             font-family: 'Rajdhani', sans-serif;
-            text-align: center;
             margin: 0;
-            padding: 30px 20px;
-            letter-spacing: 0.05em;
-        }
-
-        h1 { 
-            font-size: 2.5rem;
-            font-weight: 700;
-            margin: 0;
-            text-transform: uppercase;
-            background: linear-gradient(to right, #ffffff, #94a3b8);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            text-shadow: 0 0 30px rgba(255,255,255,0.1);
-        }
-
-        .subtitle {
-            font-size: 1rem;
-            color: var(--neon-cyan);
-            text-transform: uppercase;
-            margin-top: 5px;
-            margin-bottom: 25px;
-            font-weight: 700;
-            letter-spacing: 0.2em;
-        }
-        
-        /* Glassmorphism Connection Control Panel */
-        .controls {
-            background: var(--glass-bg);
-            backdrop-filter: blur(12px);
-            -webkit-backdrop-filter: blur(12px);
-            border: 1px solid var(--glass-border);
-            border-radius: 12px;
-            display: inline-flex;
-            align-items: center;
-            gap: 10px;
-            padding: 10px 16px;
-            margin-bottom: 20px;
-            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
-        }
-
-        input {
-            padding: 8px 14px;
-            border-radius: 6px;
-            border: 1px solid rgba(255,255,255,0.1);
-            background: rgba(15, 23, 42, 0.6);
-            color: white;
-            font-family: 'Share Tech Mono', monospace;
-            font-size: 14px;
-            outline: none;
-            transition: all 0.3s ease;
-        }
-        input:focus {
-            border-color: var(--neon-cyan);
-            box-shadow: 0 0 10px rgba(6, 182, 212, 0.3);
-        }
-
-        button {
-            padding: 8px 18px;
-            border-radius: 6px;
-            border: none;
-            background: linear-gradient(135deg, #0284c7 0%, #0369a1 100%);
-            color: white;
-            font-family: 'Rajdhani', sans-serif;
-            font-weight: 700;
-            font-size: 14px;
-            text-transform: uppercase;
-            cursor: pointer;
-            transition: all 0.2s ease;
-            box-shadow: 0 4px 12px rgba(2, 132, 199, 0.2);
-        }
-        button:hover { 
-            transform: translateY(-1px);
-            box-shadow: 0 6px 16px rgba(2, 132, 199, 0.4);
-        }
-
-        .status-container {
-            font-size: 14px;
-            margin-bottom: 25px;
-            text-transform: uppercase;
-            font-weight: 700;
-            color: #64748b;
-        }
-        .status { 
-            color: var(--neon-red); 
-            transition: color 0.3s ease;
-        }
-        
-        /* Main Flight Deck Dashboard Layout Grid */
-        .dashboard-grid {
+            padding: 0;
+            overflow: hidden;
             display: flex;
             flex-direction: column;
-            align-items: center;
-            max-width: 500px;
-            margin: 0 auto;
-            gap: 20px;
+            height: 100vh;
         }
 
-        /* Glassmorphism Autopilot Mode Control Panel */
-        .mcp-panel {
-            background: var(--glass-bg);
-            backdrop-filter: blur(12px);
-            -webkit-backdrop-filter: blur(12px);
-            border: 1px solid var(--glass-border);
-            border-radius: 14px;
-            width: 100%;
-            box-sizing: border-box;
-            padding: 15px 25px;
+        /* Top Autopilot Mode Control Panel (MCP) */
+        header {
+            background: #0f172a;
+            border-bottom: 2px solid #334155;
+            padding: 10px 40px;
             display: flex;
             justify-content: space-between;
             align-items: center;
-            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.3);
-        }
-        .mcp-group {
-            text-align: left;
-        }
-        .mcp-label {
-            color: #94a3b8;
-            font-size: 12px;
-            font-weight: 700;
-            letter-spacing: 0.1em;
-            text-transform: uppercase;
-            margin-bottom: 2px;
-        }
-        .mcp-display {
-            color: var(--neon-cyan);
-            font-family: 'Share Tech Mono', monospace;
-            font-size: 26px;
-            font-weight: bold;
-            text-shadow: 0 0 12px rgba(6, 182, 212, 0.6);
-        }
-        .mcp-sys-title {
-            font-weight: 700;
-            font-size: 16px;
-            color: #cbd5e1;
-            text-transform: uppercase;
-            border-left: 3px solid var(--neon-cyan);
-            padding-left: 8px;
+            z-index: 10;
         }
 
-        /* Instrument Container Styling */
-        .instrument-wrapper {
+        .brand-title {
+            font-size: 22px;
+            font-weight: 700;
+            letter-spacing: 0.15em;
+            background: linear-gradient(to right, #fff, #94a3b8);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .mcp-box {
+            background: rgba(0,0,0,0.4);
+            border: 1px solid #475569;
+            padding: 4px 15px;
+            border-radius: 4px;
+            text-align: center;
+        }
+        .mcp-lbl { font-size: 11px; color: #94a3b8; font-weight: bold; }
+        .mcp-val { font-family: 'Share Tech Mono', monospace; font-size: 20px; color: var(--neon-cyan); }
+
+        .conn-ui { display: flex; gap: 10px; align-items: center; }
+        input {
+            background: #1e293b; border: 1px solid #475569; color: white;
+            padding: 6px 12px; border-radius: 4px; font-family: monospace; font-size: 13px; outline: none;
+        }
+        button {
+            background: #0284c7; border: none; color: white; padding: 6px 16px;
+            border-radius: 4px; font-weight: bold; font-family: 'Rajdhani', sans-serif; cursor: pointer;
+        }
+
+        /* Screen Wrapper */
+        .pfd-container {
+            flex: 1;
             position: relative;
-            padding: 10px;
-            background: radial-gradient(circle at center, rgba(30,41,59,0.2) 0%, rgba(15,23,42,0.8) 100%);
-            border-radius: 50%;
-            border: 1px solid rgba(255,255,255,0.05);
-            box-shadow: inset 0 0 20px rgba(0,0,0,0.6);
+            width: 100vw;
+            background: #000;
         }
 
         canvas {
-            background-color: #020617;
-            border: 6px solid #334155;
-            border-radius: 50%;
-            box-shadow: 0 20px 40px -15px rgba(0, 0, 0, 0.7);
             display: block;
+            width: 100%;
+            height: 100%;
         }
     </style>
 </head>
 <body>
 
-    <h1>PROJECT HORIZON</h1>
-    <div class="subtitle">Primary Flight Display</div>
-    
-    <div class="controls">
-        <input type="text" id="ipAddress" placeholder="10.0.0.79">
-        <button onclick="connectToPi()">Engage Link</button>
-    </div>
-
-    <div class="status-container">SYS LINK: <span id="statusText" class="status">Offline</span></div>
-
-    <div class="dashboard-grid">
-        <div class="mcp-panel">
-            <div class="mcp-sys-title">Autopilot HUD</div>
-            <div class="mcp-group">
-                <div class="mcp-label">SEL ALT</div>
-                <div id="altDisplay" class="mcp-display">5000 FT</div>
-            </div>
+    <header>
+        <div class="brand-title">HORIZON PFD SIM</div>
+        
+        <div class="mcp-box">
+            <div class="mcp-lbl">AP SEL ALT</div>
+            <div id="mcpAlt">5000 FT</div>
         </div>
 
-        <div class="instrument-wrapper">
-            <canvas id="horizonCanvas" width="400" height="400"></canvas>
+        <div class="conn-ui">
+            <input type="text" id="ipAddress" placeholder="10.0.0.79">
+            <button onclick="connectToPi()">ENGAGE LINK</button>
         </div>
+    </header>
+
+    <div class="pfd-container">
+        <canvas id="pfdCanvas"></canvas>
     </div>
 
     <script>
-        const canvas = document.getElementById('horizonCanvas');
+        const canvas = document.getElementById('pfdCanvas');
         const ctx = canvas.getContext('2d');
-        const statusText = document.getElementById('statusText');
-        const altDisplay = document.getElementById('altDisplay');
+        const mcpAlt = document.getElementById('mcpAlt');
         
         let socket = null;
 
-        function drawInstrument(pitch, roll) {
-            const width = canvas.width;
-            const height = canvas.height;
-            const cx = width / 2;
-            const cy = height / 2;
-            const radius = width / 2;
+        // Shared Flight Telemetry States (with basic internal flight physics engine)
+        let sim = {
+            pitch: 0, roll: 0, heading: 0,
+            altitude: 5000, airspeed: 140,
+            targetAlt: 5000
+        };
 
-            ctx.clearRect(0, 0, width, height);
+        // Resize Canvas dynamically to fill monitor screen perfectly
+        function resizeCanvas() {
+            canvas.width = canvas.clientWidth;
+            canvas.height = canvas.clientHeight;
+            renderPFD();
+        }
+        window.addEventListener('resize', resizeCanvas);
 
-            // 1. DRAW ROTATING SKY/GROUND OVERLAY
+        function renderPFD() {
+            const W = canvas.width;
+            const H = canvas.height;
+            if (W === 0 || H === 0) return;
+
+            const cx = W / 2;
+            const cy = H / 2;
+
+            ctx.clearRect(0, 0, W, H);
+
+            // -------------------------------------------------------------
+            // 1. FULL BACKGROUND EXTENDED ATTITUDE HUD
+            // -------------------------------------------------------------
             ctx.save();
             ctx.translate(cx, cy);
-            ctx.rotate(roll * Math.PI / 180);
+            ctx.rotate(sim.roll * Math.PI / 180);
 
-            const pitchOffset = pitch * 2.5; // Slightly enhanced dynamic range
+            const pitchPxPerDeg = H / 60; 
+            const pitchOffset = sim.pitch * pitchPxPerDeg;
 
-            // Premium Deep Sky Gradient
-            let skyGrad = ctx.createLinearGradient(0, -radius, 0, radius);
-            skyGrad.addColorStop(0, '#0284c7');
-            skyGrad.addColorStop(1, '#38bdf8');
-            ctx.fillStyle = skyGrad; 
-            ctx.beginPath();
-            ctx.arc(0, 0, radius, 0, 2 * Math.PI);
-            ctx.fill();
-
-            // Premium Terrain Gradient
-            let groundGrad = ctx.createLinearGradient(0, -radius, 0, radius);
-            groundGrad.addColorStop(0, '#451a03');
-            groundGrad.addColorStop(1, '#78350f');
-            ctx.fillStyle = groundGrad; 
-            ctx.beginPath();
-            ctx.rect(-radius, pitchOffset, radius * 2, radius * 2);
-            ctx.fill();
-
-            // Horizon Dividing Line
+            // Sky render
+            ctx.fillStyle = "#1d4ed8";
+            ctx.fillRect(-W, -H * 2, W * 2, H * 2 + pitchOffset);
+            // Ground render
+            ctx.fillStyle = "#451a03";
+            ctx.fillRect(-W, pitchOffset, W * 2, H * 2);
+            // White Horizon line
             ctx.strokeStyle = "#ffffff";
             ctx.lineWidth = 3;
+            ctx.beginPath(); ctx.moveTo(-W, pitchOffset); ctx.lineTo(W, pitchOffset); ctx.stroke();
+
+            // Pitch Ladder Lines
+            ctx.strokeStyle = "rgba(255,255,255,0.5)";
+            ctx.fillStyle = "rgba(255,255,255,0.9)";
+            ctx.lineWidth = 2;
+            ctx.font = "700 14px 'Rajdhani', sans-serif";
+            ctx.textAlign = "center"; ctx.textBaseline = "middle";
+
+            for (let i = -30; i <= 30; i += 10) {
+                if (i === 0) continue;
+                let yPos = pitchOffset - (i * pitchPxPerDeg);
+                ctx.beginPath();
+                ctx.moveTo(-40, yPos); ctx.lineTo(40, yPos);
+                ctx.stroke();
+                ctx.fillText(Math.abs(i), -60, yPos);
+                ctx.fillText(Math.abs(i), 60, yPos);
+            }
+            ctx.restore();
+
+            // -------------------------------------------------------------
+            // 2. STATIC CENTER AIRCRAFT RETICLE (Standard Boeing style)
+            // -------------------------------------------------------------
+            ctx.strokeStyle = "#ffaa00";
+            ctx.lineWidth = 5;
             ctx.beginPath();
-            ctx.moveTo(-radius, pitchOffset);
-            ctx.lineTo(radius, pitchOffset);
+            ctx.moveTo(cx - 100, cy); ctx.lineTo(cx - 40, cy); ctx.lineTo(cx - 40, cy + 15);
+            ctx.moveTo(cx + 100, cy); ctx.lineTo(cx + 40, cy); ctx.lineTo(cx + 40, cy + 15);
+            ctx.moveTo(cx - 5, cy); ctx.lineTo(cx + 5, cy);
+            ctx.moveTo(cx, cy - 5); ctx.lineTo(cx, cy + 5);
             ctx.stroke();
 
-            // Clean Pitch Ladder Configurations
-            ctx.strokeStyle = "rgba(255, 255, 255, 0.6)";
-            ctx.fillStyle = "rgba(255, 255, 255, 0.8)";
-            ctx.lineWidth = 2;
-            ctx.font = "700 13px 'Rajdhani', sans-serif";
-            ctx.textAlign = "center";
-            ctx.textBaseline = "middle";
+            // -------------------------------------------------------------
+            // 3. AIRSPEED VERTICAL TAPE (LEFT EDGE)
+            // -------------------------------------------------------------
+            const tapeW = 75;
+            const tapeH = H * 0.7;
+            const tapeY = (H - tapeH) / 2;
 
-            function drawPitchLine(degrees, labelText) {
-                let yPos = pitchOffset - (degrees * 2.5);
-                ctx.beginPath();
-                ctx.moveTo(-25, yPos);
-                ctx.lineTo(25, yPos);
-                ctx.stroke();
-                ctx.fillText(labelText, -40, yPos);
-                ctx.fillText(labelText, 40, yPos);
+            ctx.fillStyle = "rgba(15, 23, 42, 0.8)";
+            ctx.strokeStyle = "#475569";
+            ctx.lineWidth = 2;
+            ctx.fillRect(20, tapeY, tapeW, tapeH);
+            ctx.strokeRect(20, tapeY, tapeW, tapeH);
+
+            ctx.save();
+            ctx.beginPath(); ctx.rect(20, tapeY, tapeW, tapeH); ctx.clip();
+            ctx.fillStyle = "#ffffff";
+            ctx.strokeStyle = "rgba(255,255,255,0.4)";
+            ctx.font = "14px 'Share Tech Mono', monospace";
+            ctx.textAlign = "right";
+
+            let startSpeed = Math.floor(sim.airspeed - 30);
+            let endSpeed = Math.floor(sim.airspeed + 30);
+            for (let s = startSpeed; s <= endSpeed; s++) {
+                if (s % 5 === 0 && s >= 0) {
+                    let sOffset = cy - (s - sim.airspeed) * (tapeH / 60);
+                    ctx.beginPath(); ctx.moveTo(70, sOffset); ctx.lineTo(95, sOffset); ctx.stroke();
+                    if (s % 10 === 0) ctx.fillText(s, 65, sOffset + 4);
+                }
+            }
+            ctx.restore();
+            
+            // Current Airspeed Digital Box overlay
+            ctx.fillStyle = "#000000"; ctx.fillRect(15, cy - 15, 65, 30);
+            ctx.strokeStyle = varColor('--neon-green'); ctx.strokeRect(15, cy - 15, 65, 30);
+            ctx.fillStyle = varColor('--neon-green'); ctx.font = "bold 18px 'Share Tech Mono'";
+            ctx.textAlign = "center"; ctx.fillText(Math.round(sim.airspeed), 47, cy + 6);
+
+            // -------------------------------------------------------------
+            // 4. ALTITUDE VERTICAL TAPE (RIGHT EDGE)
+            // -------------------------------------------------------------
+            const altX = W - 25 - tapeW;
+            ctx.fillStyle = "rgba(15, 23, 42, 0.8)";
+            ctx.fillRect(altX, tapeY, tapeW, tapeH);
+            ctx.strokeRect(altX, tapeY, tapeW, tapeH);
+
+            ctx.save();
+            ctx.beginPath(); ctx.rect(altX, tapeY, tapeW, tapeH); ctx.clip();
+            ctx.fillStyle = "#ffffff";
+            ctx.strokeStyle = "rgba(255,255,255,0.4)";
+            ctx.font = "14px 'Share Tech Mono', monospace";
+            ctx.textAlign = "left";
+
+            let startAlt = Math.floor(sim.altitude - 300);
+            let endAlt = Math.floor(sim.altitude + 300);
+            for (let a = startAlt; a <= endAlt; a++) {
+                if (a % 50 === 0) {
+                    let aOffset = cy - (a - sim.altitude) * (tapeH / 600);
+                    ctx.beginPath(); ctx.moveTo(altX, aOffset); ctx.lineTo(altX + 20, aOffset); ctx.stroke();
+                    if (a % 100 === 0) ctx.fillText(a, altX + 25, aOffset + 4);
+                }
             }
 
-            drawPitchLine(20, "20");
-            drawPitchLine(10, "10");
-            drawPitchLine(-10, "10");
-            drawPitchLine(-20, "20");
+            // Target Altitude Bug Rendering on the Moving Tape
+            let bugY = cy - (sim.targetAlt - sim.altitude) * (tapeH / 600);
+            ctx.fillStyle = varColor('--neon-cyan');
+            ctx.beginPath();
+            ctx.moveTo(altX, bugY); ctx.lineTo(altX + 12, bugY - 8); ctx.lineTo(altX + 35, bugY - 8);
+            ctx.lineTo(altX + 35, bugY + 8); ctx.lineTo(altX + 12, bugY + 8);
+            ctx.fill();
+            ctx.fillStyle = "#000000"; ctx.font = "bold 10px sans-serif";
+            ctx.fillText("AL", altX + 5, bugY + 3);
 
             ctx.restore();
 
-            // 2. FIXED AERODYNAMIC SYMBOL (Sleek minimalist style)
-            ctx.strokeStyle = "#f59e0b"; 
-            ctx.lineWidth = 4;
-            ctx.shadowBlur = 10;
-            ctx.shadowColor = "rgba(245, 158, 11, 0.5)";
-            
-            ctx.beginPath();
-            // Left Wing Profile
-            ctx.moveTo(cx - 70, cy);
-            ctx.lineTo(cx - 25, cy);
-            ctx.lineTo(cx - 25, cy + 8);
-            // Center Reticle
-            ctx.moveTo(cx, cy);
-            ctx.arc(cx, cy, 2, 0, 2 * Math.PI);
-            // Right Wing Profile
-            ctx.moveTo(cx + 70, cy);
-            ctx.lineTo(cx + 25, cy);
-            ctx.lineTo(cx + 25, cy + 8);
-            ctx.stroke();
-            
-            // Clear shadow effect for subsequent drawings
-            ctx.shadowBlur = 0;
+            // Current Altitude Digital Box overlay
+            ctx.fillStyle = "#000000"; ctx.fillRect(altX + 15, cy - 15, 75, 30);
+            ctx.strokeStyle = varColor('--neon-green'); ctx.strokeRect(altX + 15, cy - 15, 75, 30);
+            ctx.fillStyle = varColor('--neon-green'); ctx.font = "bold 18px 'Share Tech Mono'";
+            ctx.textAlign = "center"; ctx.fillText(Math.round(sim.altitude), altX + 52, cy + 6);
+
+            // -------------------------------------------------------------
+            // 5. HORIZONTAL COMPASS HEADING TAPE (BOTTOM EDGE)
+            // -------------------------------------------------------------
+            const hdgW = W * 0.4;
+            const hdgH = 40;
+            const hdgX = cx - (hdgW / 2);
+            const hdgY = H - 60;
+
+            ctx.fillStyle = "rgba(15, 23, 42, 0.9)";
+            ctx.fillRect(hdgX, hdgY, hdgW, hdgH);
+            ctx.strokeRect(hdgX, hdgY, hdgW, hdgH);
+
+            ctx.save();
+            ctx.beginPath(); ctx.rect(hdgX, hdgY, hdgW, hdgH); ctx.clip();
+            ctx.strokeStyle = "rgba(255,255,255,0.4)";
+            ctx.fillStyle = "#ffffff";
+            ctx.font = "bold 13px 'Share Tech Mono'";
+            ctx.textAlign = "center";
+
+            let startHdg = Math.floor(sim.heading - 25);
+            let endHdg = Math.floor(sim.heading + 25);
+            for (let h = startHdg; h <= endHdg; h++) {
+                let normalizedHdg = (h + 360) % 360;
+                let hOffset = cx + (h - sim.heading) * (hdgW / 50);
+                
+                if (normalizedHdg % 5 === 0) {
+                    ctx.beginPath(); ctx.moveTo(hOffset, hdgY); ctx.lineTo(hOffset, hdgY + 10); ctx.stroke();
+                    
+                    if (normalizedHdg % 10 === 0) {
+                        let label = normalizedHdg / 10;
+                        if (normalizedHdg === 0) label = "N";
+                        else if (normalizedHdg === 90) label = "E";
+                        else if (normalizedHdg === 180) label = "S";
+                        else if (normalizedHdg === 270) label = "W";
+                        ctx.fillText(label, hOffset, hdgY + 26);
+                    }
+                }
+            }
+            ctx.restore();
+
+            // Center heading index indicator pointer
+            ctx.fillStyle = varColor('--neon-magenta');
+            ctx.beginPath(); ctx.moveTo(cx, hdgY); ctx.lineTo(cx - 8, hdgY - 10); ctx.lineTo(cx + 8, hdgY - 10); ctx.fill();
         }
 
-        // Initialize display graphic
-        drawInstrument(0, 0);
+        function varColor(name) {
+            return getComputedStyle(document.documentElement).getPropertyValue(name).trim();
+        }
+
+        // Initialize display context
+        setTimeout(resizeCanvas, 100);
+
+        // Basic physics loop to turn sensor data into continuous altitude/airspeed variations
+        setInterval(() => {
+            // Internal aerodynamics engine link
+            // Climbing decays speed, diving triggers acceleration
+            sim.altitude += (sim.pitch / 5);
+            sim.airspeed -= (sim.pitch / 18);
+            if (sim.airspeed < 60) sim.airspeed = 60; // Stall boundary cap
+            if (sim.airspeed > 250) sim.airspeed = 250; // VNE speed limit cap
+            renderPFD();
+        }, 50);
 
         function connectToPi() {
             const ip = document.getElementById('ipAddress').value.trim() || "10.0.0.79";
-            
-            statusText.innerText = "Connecting...";
-            statusText.style.color = "#f59e0b";
-
             socket = new WebSocket(`ws://${ip}:8765`);
 
-            socket.onopen = function() {
-                statusText.innerText = "Online";
-                statusText.style.color = "var(--neon-green)";
-                statusText.style.textShadow = "0 0 10px rgba(16, 185, 129, 0.5)";
-            };
+            socket.onopen = function() { console.log("PFD Core Link Online."); };
 
             socket.onmessage = function(event) {
                 try {
                     const data = JSON.parse(event.data);
-                    drawInstrument(data.pitch, data.roll);
-                    altDisplay.innerText = data.target_alt + " FT";
-                } catch (err) {
-                    console.error("Data tracking failure:", err);
-                }
-            };
-
-            socket.onclose = function() {
-                statusText.innerText = "Offline";
-                statusText.style.color = "var(--neon-red)";
-                statusText.style.textShadow = "none";
+                    sim.pitch = data.pitch;
+                    sim.roll = data.roll;
+                    sim.heading = data.heading; // Assign new compass channel
+                    sim.targetAlt = data.target_alt;
+                    
+                    mcpAlt.innerText = data.target_alt + " FT";
+                } catch (err) {}
             };
         }
     </script>
-
 </body>
 </html>
