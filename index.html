@@ -15,12 +15,207 @@
         }
         h1 { margin-bottom: 5px; }
         .status { color: #ef4444; font-weight: bold; }
+        
+        .controls {
+            margin: 15px 0;
+        }
+        input {
+            padding: 6px 10px;
+            border-radius: 4px;
+            border: 1px solid #475569;
+            background-color: #1e293b;
+            color: white;
+            font-size: 14px;
+        }
+        button {
+            padding: 6px 15px;
+            border-radius: 4px;
+            border: none;
+            background-color: #3b82f6;
+            color: white;
+            font-weight: bold;
+            cursor: pointer;
+        }
+        button:hover { background-color: #2563eb; }
+
+        /* Sleek Autopilot Selection Panel (MCP Layout) */
+        .mcp-panel {
+            background-color: #1e293b;
+            border: 2px solid #475569;
+            border-radius: 6px;
+            display: inline-block;
+            padding: 10px 20px;
+            margin: 10px auto;
+            text-align: left;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        }
+        .mcp-label {
+            color: #94a3b8;
+            font-size: 11px;
+            font-weight: bold;
+            letter-spacing: 0.05em;
+            margin-bottom: 4px;
+        }
+        .mcp-display {
+            color: #06b6d4; /* Vibrant Cyan autopilot color */
+            font-family: monospace;
+            font-size: 22px;
+            font-weight: bold;
+        }
+
+        canvas {
+            background-color: #000;
+            border: 4px solid #475569;
+            border-radius: 50%;
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.3);
+            margin-top: 15px;
+        }
     </style>
 </head>
 <body>
 
     <h1>PROJECT HORIZON</h1>
     <p>Flight Instrument Deck</p>
-    <p>Status : <span class="status">Disconnected</span></p>
+    
+    <div class="controls">
+        <input type="text" id="ipAddress" placeholder="Pi IP Address (e.g., 192.168.1.5)">
+        <button onclick="connectToPi()">Connect</button>
+    </div>
+
+    <p>Status: <span id="statusText" class="status">Disconnected</span></p>
+
+    <div class="mcp-panel">
+        <div class="mcp-label">SEL ALT</div>
+        <div id="altDisplay" class="mcp-display">5000 FT</div>
+    </div>
+    <br>
+
+    <canvas id="horizonCanvas" width="400" height="400"></canvas>
+
+    <script>
+        const canvas = document.getElementById('horizonCanvas');
+        const ctx = canvas.getContext('2d');
+        const statusText = document.getElementById('statusText');
+        const altDisplay = document.getElementById('altDisplay');
+        
+        let socket = null;
+
+        function drawInstrument(pitch, roll) {
+            const width = canvas.width;
+            const height = canvas.height;
+            const cx = width / 2;
+            const cy = height / 2;
+            const radius = width / 2;
+
+            ctx.clearRect(0, 0, width, height);
+
+            ctx.save();
+            ctx.translate(cx, cy);
+            ctx.rotate(roll * Math.PI / 180);
+
+            const pitchOffset = pitch * 2; 
+
+            // Draw Sky
+            ctx.fillStyle = "#38bdf8"; 
+            ctx.beginPath();
+            ctx.arc(0, 0, radius, 0, 2 * Math.PI);
+            ctx.fill();
+
+            // Draw Ground
+            ctx.fillStyle = "#78350f"; 
+            ctx.beginPath();
+            ctx.rect(-radius, pitchOffset, radius * 2, radius * 2);
+            ctx.fill();
+
+            // Draw Horizon Line
+            ctx.strokeStyle = "#ffffff";
+            ctx.lineWidth = 4;
+            ctx.beginPath();
+            ctx.moveTo(-radius, pitchOffset);
+            ctx.lineTo(radius, pitchOffset);
+            ctx.stroke();
+
+            // Pitch Ladder Lines & Labels
+            ctx.strokeStyle = "rgba(255, 255, 255, 0.75)";
+            ctx.fillStyle = "rgba(255, 255, 255, 0.75)";
+            ctx.lineWidth = 3;
+            ctx.font = "12px sans-serif";
+            ctx.textAlign = "center";
+            ctx.textBaseline = "middle";
+
+            function drawPitchLine(degrees, labelText) {
+                let yPos = pitchOffset - (degrees * 2);
+                ctx.beginPath();
+                ctx.moveTo(-30, yPos);
+                ctx.lineTo(30, yPos);
+                ctx.stroke();
+                ctx.fillText(labelText, -45, yPos);
+                ctx.fillText(labelText, 45, yPos);
+            }
+
+            drawPitchLine(20, "20");
+            drawPitchLine(10, "10");
+            drawPitchLine(-10, "10");
+            drawPitchLine(-20, "20");
+
+            ctx.restore();
+
+            // Draw Static Miniature Aircraft Symbol
+            ctx.strokeStyle = "#f59e0b"; 
+            ctx.lineWidth = 5;
+            ctx.beginPath();
+            ctx.moveTo(cx - 60, cy);
+            ctx.lineTo(cx - 20, cy);
+            ctx.lineTo(cx - 20, cy + 10);
+            ctx.moveTo(cx, cy);
+            ctx.arc(cx, cy, 3, 0, 2 * Math.PI);
+            ctx.moveTo(cx + 60, cy);
+            ctx.lineTo(cx + 20, cy);
+            ctx.lineTo(cx + 20, cy + 10);
+            ctx.stroke();
+        }
+
+        // Default initial display state
+        drawInstrument(0, 0);
+
+        function connectToPi() {
+            const ip = document.getElementById('ipAddress').value.trim();
+            
+            if (!ip) {
+                alert("Please enter your Raspberry Pi's IP address first!");
+                return;
+            }
+
+            statusText.innerText = "Connecting...";
+            statusText.style.color = "#f59e0b";
+
+            socket = new WebSocket(`ws://${ip}:8765`);
+
+            socket.onopen = function() {
+                statusText.innerText = "Connected";
+                statusText.style.color = "#22c55e";
+            };
+
+            socket.onmessage = function(event) {
+                try {
+                    const data = JSON.parse(event.data);
+                    
+                    // Update the attitude indicator background
+                    drawInstrument(data.pitch, data.roll);
+                    
+                    // Update the HTML text container directly
+                    altDisplay.innerText = data.target_alt + " FT";
+                } catch (err) {
+                    console.error("Error reading data packet:", err);
+                }
+            };
+
+            socket.onclose = function() {
+                statusText.innerText = "Disconnected";
+                statusText.style.color = "#ef4444";
+            };
+        }
+    </script>
+
 </body>
 </html>
