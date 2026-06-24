@@ -3,94 +3,209 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Project Horizon - Flight Deck</title>
+    <title>Project Horizon - Advanced Flight Deck</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@500;700&family=Share+Tech+Mono&display=swap" rel="stylesheet">
+    
     <style>
+        :root {
+            --neon-cyan: #06b6d4;
+            --neon-green: #10b981;
+            --neon-red: #ef4444;
+            --glass-bg: rgba(30, 41, 59, 0.45);
+            --glass-border: rgba(255, 255, 255, 0.08);
+        }
+
         body {
-            background-color: #0f172a;
+            background: radial-gradient(circle at center, #1e1b4b 0%, #0f0a1e 100%);
             color: #f8fafc;
-            font-family: sans-serif;
+            font-family: 'Rajdhani', sans-serif;
             text-align: center;
             margin: 0;
-            padding: 20px;
+            padding: 30px 20px;
+            letter-spacing: 0.05em;
         }
-        h1 { margin-bottom: 5px; }
-        .status { color: #ef4444; font-weight: bold; }
-        
-        .controls {
-            margin: 15px 0;
-        }
-        input {
-            padding: 6px 10px;
-            border-radius: 4px;
-            border: 1px solid #475569;
-            background-color: #1e293b;
-            color: white;
-            font-size: 14px;
-        }
-        button {
-            padding: 6px 15px;
-            border-radius: 4px;
-            border: none;
-            background-color: #3b82f6;
-            color: white;
-            font-weight: bold;
-            cursor: pointer;
-        }
-        button:hover { background-color: #2563eb; }
 
-        /* Sleek Autopilot Selection Panel (MCP Layout) */
-        .mcp-panel {
-            background-color: #1e293b;
-            border: 2px solid #475569;
+        h1 { 
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin: 0;
+            text-transform: uppercase;
+            background: linear-gradient(to right, #ffffff, #94a3b8);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            text-shadow: 0 0 30px rgba(255,255,255,0.1);
+        }
+
+        .subtitle {
+            font-size: 1rem;
+            color: var(--neon-cyan);
+            text-transform: uppercase;
+            margin-top: 5px;
+            margin-bottom: 25px;
+            font-weight: 700;
+            letter-spacing: 0.2em;
+        }
+        
+        /* Glassmorphism Connection Control Panel */
+        .controls {
+            background: var(--glass-bg);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid var(--glass-border);
+            border-radius: 12px;
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            padding: 10px 16px;
+            margin-bottom: 20px;
+            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+        }
+
+        input {
+            padding: 8px 14px;
             border-radius: 6px;
-            display: inline-block;
-            padding: 10px 20px;
-            margin: 10px auto;
+            border: 1px solid rgba(255,255,255,0.1);
+            background: rgba(15, 23, 42, 0.6);
+            color: white;
+            font-family: 'Share Tech Mono', monospace;
+            font-size: 14px;
+            outline: none;
+            transition: all 0.3s ease;
+        }
+        input:focus {
+            border-color: var(--neon-cyan);
+            box-shadow: 0 0 10px rgba(6, 182, 212, 0.3);
+        }
+
+        button {
+            padding: 8px 18px;
+            border-radius: 6px;
+            border: none;
+            background: linear-gradient(135deg, #0284c7 0%, #0369a1 100%);
+            color: white;
+            font-family: 'Rajdhani', sans-serif;
+            font-weight: 700;
+            font-size: 14px;
+            text-transform: uppercase;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            box-shadow: 0 4px 12px rgba(2, 132, 199, 0.2);
+        }
+        button:hover { 
+            transform: translateY(-1px);
+            box-shadow: 0 6px 16px rgba(2, 132, 199, 0.4);
+        }
+
+        .status-container {
+            font-size: 14px;
+            margin-bottom: 25px;
+            text-transform: uppercase;
+            font-weight: 700;
+            color: #64748b;
+        }
+        .status { 
+            color: var(--neon-red); 
+            transition: color 0.3s ease;
+        }
+        
+        /* Main Flight Deck Dashboard Layout Grid */
+        .dashboard-grid {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            max-width: 500px;
+            margin: 0 auto;
+            gap: 20px;
+        }
+
+        /* Glassmorphism Autopilot Mode Control Panel */
+        .mcp-panel {
+            background: var(--glass-bg);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid var(--glass-border);
+            border-radius: 14px;
+            width: 100%;
+            box-sizing: border-box;
+            padding: 15px 25px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.3);
+        }
+        .mcp-group {
             text-align: left;
-            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
         }
         .mcp-label {
             color: #94a3b8;
-            font-size: 11px;
-            font-weight: bold;
-            letter-spacing: 0.05em;
-            margin-bottom: 4px;
+            font-size: 12px;
+            font-weight: 700;
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+            margin-bottom: 2px;
         }
         .mcp-display {
-            color: #06b6d4; /* Vibrant Cyan autopilot color */
-            font-family: monospace;
-            font-size: 22px;
+            color: var(--neon-cyan);
+            font-family: 'Share Tech Mono', monospace;
+            font-size: 26px;
             font-weight: bold;
+            text-shadow: 0 0 12px rgba(6, 182, 212, 0.6);
+        }
+        .mcp-sys-title {
+            font-weight: 700;
+            font-size: 16px;
+            color: #cbd5e1;
+            text-transform: uppercase;
+            border-left: 3px solid var(--neon-cyan);
+            padding-left: 8px;
+        }
+
+        /* Instrument Container Styling */
+        .instrument-wrapper {
+            position: relative;
+            padding: 10px;
+            background: radial-gradient(circle at center, rgba(30,41,59,0.2) 0%, rgba(15,23,42,0.8) 100%);
+            border-radius: 50%;
+            border: 1px solid rgba(255,255,255,0.05);
+            box-shadow: inset 0 0 20px rgba(0,0,0,0.6);
         }
 
         canvas {
-            background-color: #000;
-            border: 4px solid #475569;
+            background-color: #020617;
+            border: 6px solid #334155;
             border-radius: 50%;
-            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.3);
-            margin-top: 15px;
+            box-shadow: 0 20px 40px -15px rgba(0, 0, 0, 0.7);
+            display: block;
         }
     </style>
 </head>
 <body>
 
     <h1>PROJECT HORIZON</h1>
-    <p>Flight Instrument Deck</p>
+    <div class="subtitle">Primary Flight Display</div>
     
     <div class="controls">
-        <input type="text" id="ipAddress" placeholder="Pi IP Address (e.g., 192.168.1.5)">
-        <button onclick="connectToPi()">Connect</button>
+        <input type="text" id="ipAddress" placeholder="10.0.0.79">
+        <button onclick="connectToPi()">Engage Link</button>
     </div>
 
-    <p>Status: <span id="statusText" class="status">Disconnected</span></p>
+    <div class="status-container">SYS LINK: <span id="statusText" class="status">Offline</span></div>
 
-    <div class="mcp-panel">
-        <div class="mcp-label">SEL ALT</div>
-        <div id="altDisplay" class="mcp-display">5000 FT</div>
+    <div class="dashboard-grid">
+        <div class="mcp-panel">
+            <div class="mcp-sys-title">Autopilot HUD</div>
+            <div class="mcp-group">
+                <div class="mcp-label">SEL ALT</div>
+                <div id="altDisplay" class="mcp-display">5000 FT</div>
+            </div>
+        </div>
+
+        <div class="instrument-wrapper">
+            <canvas id="horizonCanvas" width="400" height="400"></canvas>
+        </div>
     </div>
-    <br>
-
-    <canvas id="horizonCanvas" width="400" height="400"></canvas>
 
     <script>
         const canvas = document.getElementById('horizonCanvas');
@@ -109,48 +224,55 @@
 
             ctx.clearRect(0, 0, width, height);
 
+            // 1. DRAW ROTATING SKY/GROUND OVERLAY
             ctx.save();
             ctx.translate(cx, cy);
             ctx.rotate(roll * Math.PI / 180);
 
-            const pitchOffset = pitch * 2; 
+            const pitchOffset = pitch * 2.5; // Slightly enhanced dynamic range
 
-            // Draw Sky
-            ctx.fillStyle = "#38bdf8"; 
+            // Premium Deep Sky Gradient
+            let skyGrad = ctx.createLinearGradient(0, -radius, 0, radius);
+            skyGrad.addColorStop(0, '#0284c7');
+            skyGrad.addColorStop(1, '#38bdf8');
+            ctx.fillStyle = skyGrad; 
             ctx.beginPath();
             ctx.arc(0, 0, radius, 0, 2 * Math.PI);
             ctx.fill();
 
-            // Draw Ground
-            ctx.fillStyle = "#78350f"; 
+            // Premium Terrain Gradient
+            let groundGrad = ctx.createLinearGradient(0, -radius, 0, radius);
+            groundGrad.addColorStop(0, '#451a03');
+            groundGrad.addColorStop(1, '#78350f');
+            ctx.fillStyle = groundGrad; 
             ctx.beginPath();
             ctx.rect(-radius, pitchOffset, radius * 2, radius * 2);
             ctx.fill();
 
-            // Draw Horizon Line
+            // Horizon Dividing Line
             ctx.strokeStyle = "#ffffff";
-            ctx.lineWidth = 4;
+            ctx.lineWidth = 3;
             ctx.beginPath();
             ctx.moveTo(-radius, pitchOffset);
             ctx.lineTo(radius, pitchOffset);
             ctx.stroke();
 
-            // Pitch Ladder Lines & Labels
-            ctx.strokeStyle = "rgba(255, 255, 255, 0.75)";
-            ctx.fillStyle = "rgba(255, 255, 255, 0.75)";
-            ctx.lineWidth = 3;
-            ctx.font = "12px sans-serif";
+            // Clean Pitch Ladder Configurations
+            ctx.strokeStyle = "rgba(255, 255, 255, 0.6)";
+            ctx.fillStyle = "rgba(255, 255, 255, 0.8)";
+            ctx.lineWidth = 2;
+            ctx.font = "700 13px 'Rajdhani', sans-serif";
             ctx.textAlign = "center";
             ctx.textBaseline = "middle";
 
             function drawPitchLine(degrees, labelText) {
-                let yPos = pitchOffset - (degrees * 2);
+                let yPos = pitchOffset - (degrees * 2.5);
                 ctx.beginPath();
-                ctx.moveTo(-30, yPos);
-                ctx.lineTo(30, yPos);
+                ctx.moveTo(-25, yPos);
+                ctx.lineTo(25, yPos);
                 ctx.stroke();
-                ctx.fillText(labelText, -45, yPos);
-                ctx.fillText(labelText, 45, yPos);
+                ctx.fillText(labelText, -40, yPos);
+                ctx.fillText(labelText, 40, yPos);
             }
 
             drawPitchLine(20, "20");
@@ -160,59 +282,61 @@
 
             ctx.restore();
 
-            // Draw Static Miniature Aircraft Symbol
+            // 2. FIXED AERODYNAMIC SYMBOL (Sleek minimalist style)
             ctx.strokeStyle = "#f59e0b"; 
-            ctx.lineWidth = 5;
+            ctx.lineWidth = 4;
+            ctx.shadowBlur = 10;
+            ctx.shadowColor = "rgba(245, 158, 11, 0.5)";
+            
             ctx.beginPath();
-            ctx.moveTo(cx - 60, cy);
-            ctx.lineTo(cx - 20, cy);
-            ctx.lineTo(cx - 20, cy + 10);
+            // Left Wing Profile
+            ctx.moveTo(cx - 70, cy);
+            ctx.lineTo(cx - 25, cy);
+            ctx.lineTo(cx - 25, cy + 8);
+            // Center Reticle
             ctx.moveTo(cx, cy);
-            ctx.arc(cx, cy, 3, 0, 2 * Math.PI);
-            ctx.moveTo(cx + 60, cy);
-            ctx.lineTo(cx + 20, cy);
-            ctx.lineTo(cx + 20, cy + 10);
+            ctx.arc(cx, cy, 2, 0, 2 * Math.PI);
+            // Right Wing Profile
+            ctx.moveTo(cx + 70, cy);
+            ctx.lineTo(cx + 25, cy);
+            ctx.lineTo(cx + 25, cy + 8);
             ctx.stroke();
+            
+            // Clear shadow effect for subsequent drawings
+            ctx.shadowBlur = 0;
         }
 
-        // Default initial display state
+        // Initialize display graphic
         drawInstrument(0, 0);
 
         function connectToPi() {
-            const ip = document.getElementById('ipAddress').value.trim();
+            const ip = document.getElementById('ipAddress').value.trim() || "10.0.0.79";
             
-            if (!ip) {
-                alert("Please enter your Raspberry Pi's IP address first!");
-                return;
-            }
-
             statusText.innerText = "Connecting...";
             statusText.style.color = "#f59e0b";
 
             socket = new WebSocket(`ws://${ip}:8765`);
 
             socket.onopen = function() {
-                statusText.innerText = "Connected";
-                statusText.style.color = "#22c55e";
+                statusText.innerText = "Online";
+                statusText.style.color = "var(--neon-green)";
+                statusText.style.textShadow = "0 0 10px rgba(16, 185, 129, 0.5)";
             };
 
             socket.onmessage = function(event) {
                 try {
                     const data = JSON.parse(event.data);
-                    
-                    // Update the attitude indicator background
                     drawInstrument(data.pitch, data.roll);
-                    
-                    // Update the HTML text container directly
                     altDisplay.innerText = data.target_alt + " FT";
                 } catch (err) {
-                    console.error("Error reading data packet:", err);
+                    console.error("Data tracking failure:", err);
                 }
             };
 
             socket.onclose = function() {
-                statusText.innerText = "Disconnected";
-                statusText.style.color = "#ef4444";
+                statusText.innerText = "Offline";
+                statusText.style.color = "var(--neon-red)";
+                statusText.style.textShadow = "none";
             };
         }
     </script>
