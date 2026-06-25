@@ -4,7 +4,7 @@ A custom, real-time, pseudo-3D browser flight simulator featuring a low-poly ter
 
 ## 🚀 Live Demo & Repository
 * **Live Web Demo:** https://subtomic1833.github.io/Project-Horizon/
-* **Code Repository:** [Insert your GitHub Repository URL here, e.g., https://github.com/your-username/Project-Horizon]
+* **Code Repository:** https://github.com/SubTomic1833/Project-Horizon
 
 ---
 
