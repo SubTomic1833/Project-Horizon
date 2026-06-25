@@ -3,7 +3,7 @@
 A custom, real-time, pseudo-3D browser flight simulator featuring a low-poly terrain rendering engine. Built to accept live motion-telemetry from a hardware control rig or fallback gracefully to full desktop keyboard and mouse controls.
 
 ## 🚀 Live Demo & Repository
-* **Live Web Demo:** [Insert your GitHub Pages URL here, e.g., https://your-username.github.io/Project-Horizon/]
+* **Live Web Demo:** https://subtomic1833.github.io/Project-Horizon/
 * **Code Repository:** [Insert your GitHub Repository URL here, e.g., https://github.com/your-username/Project-Horizon]
 
 ---
