@@ -64,21 +64,41 @@
         let socket = null;
 
         // Flight Telemetry
-        let flight = { pitch: 0, roll: 0, heading: 0, throttle: 0, airspeed: 0, altitude: 300 };
+        let flight = { pitch: 0, roll: 0, heading: 0, throttle: 0, airspeed: 0, altitude: 450 };
         
-        // 3D Terrain Configuration
-        const gridCols = 24;       
-        const gridRows = 25;       
-        const spacing = 50;        
-        let worldForwardZ = 0;     
-        let worldLeftX = 0;        // NEW: Tracks your true lateral position over the world map
+        // Aircraft Position coordinates in World Space
+        const mapSize = 600; 
+        const spacing = 65;  
+        
+        let posX = (mapSize * spacing) / 2;
+        let posZ = (mapSize * spacing) / 2;
 
-        // Heightmap generator for 3D islands/peaks
-        function getTerrainElevation(gx, gz) {
-            let mountainNoise = Math.sin(gx * 0.15) * Math.cos(gz * 0.12) * 160;
-            let detailNoise = Math.sin(gz * 0.3) * 30;
-            let finalHeight = mountainNoise + detailNoise;
-            return finalHeight < 15 ? 0 : finalHeight;
+        const viewCols = 50;       
+        const viewRows = 52;       
+
+        // -------------------------------------------------------------
+        // VARIED MOUNTAIN RANGE & HILL GENERATOR
+        // -------------------------------------------------------------
+        const terrainMap = [];
+        function pregenerateWorldMap() {
+            for (let x = 0; x < mapSize; x++) {
+                terrainMap[x] = [];
+                for (let z = 0; z < mapSize; z++) {
+                    let baseHills = Math.sin(x * 0.04) * Math.cos(z * 0.04) * 220;
+                    let detailBumps = Math.sin(z * 0.12) * Math.cos(x * 0.15) * 50;
+                    let mountainRows = Math.abs(Math.sin(x * 0.015 + z * 0.01)) * 380;
+                    
+                    let finalHeight = baseHills + detailBumps + mountainRows;
+                    terrainMap[x][z] = finalHeight < -40 ? -40 : finalHeight;
+                }
+            }
+        }
+        pregenerateWorldMap();
+
+        function getPreloadedElevation(gx, gz) {
+            let boundedX = Math.max(0, Math.min(mapSize - 1, gx));
+            let boundedZ = Math.max(0, Math.min(mapSize - 1, gz));
+            return terrainMap[boundedX][boundedZ];
         }
 
         function resizeCanvas() {
@@ -88,107 +108,220 @@
         window.addEventListener('resize', resizeCanvas);
         resizeCanvas();
 
+        // -------------------------------------------------------------
+        // NEW: FLIGHT INSTRUMENTS RENDER PIPELINE (RIGHT SIDE)
+        // -------------------------------------------------------------
+        function drawFlightInstruments(ctx, W, H) {
+            const containerWidth = 140;
+            const containerHeight = 360;
+            const rightMargin = 25;
+            
+            // Layout baseline boxes
+            const startX = W - containerWidth - rightMargin;
+            const startY = (H - containerHeight) / 2;
+            const middleY = startY + (containerHeight / 2);
+
+            // Semi-translucent dark instrument console backing block
+            ctx.fillStyle = "rgba(0, 5, 0, 0.75)";
+            ctx.strokeStyle = "#00ff66";
+            ctx.lineWidth = 2;
+            ctx.fillRect(startX, startY, containerWidth, containerHeight);
+            ctx.strokeRect(startX, startY, containerWidth, containerHeight);
+
+            // Draw Central dividing track lines
+            ctx.strokeStyle = "rgba(0, 255, 102, 0.3)";
+            ctx.beginPath();
+            ctx.moveTo(startX + (containerWidth / 2), startY);
+            ctx.lineTo(startX + (containerWidth / 2), startY + containerHeight);
+            ctx.stroke();
+
+            ctx.save();
+            // Scissor-clip canvas region boundary limits to hide rolling elements spilling out
+            ctx.beginPath();
+            ctx.rect(startX, startY + 5, containerWidth, containerHeight - 10);
+            ctx.clip();
+
+            ctx.font = "14px 'Share Tech Mono', monospace";
+            ctx.textAlign = "center";
+            ctx.textBaseline = "middle";
+
+            // --- SPEEDOMATER TAPE (LEFT CHANNEL) ---
+            let currentAirspeed = flight.airspeed;
+            let speedRoundBase = Math.floor(currentAirspeed / 20) * 20;
+            
+            for (let s = speedRoundBase - 100; s <= speedRoundBase + 100; s += 20) {
+                if (s < 0) continue;
+                // Vertical pixel distance distribution relative to center line value
+                let deltaY = (currentAirspeed - s) * 1.5; 
+                let textY = middleY + deltaY;
+
+                ctx.fillStyle = "rgba(0, 255, 102, 0.85)";
+                ctx.fillText(s + " KT", startX + 32, textY);
+                
+                ctx.strokeStyle = "#00ff66";
+                ctx.beginPath();
+                ctx.moveTo(startX + 55, textY);
+                ctx.lineTo(startX + 65, textY);
+                ctx.stroke();
+            }
+
+            // --- ALTITUDE TAPE (RIGHT CHANNEL) ---
+            let currentAltitude = flight.altitude;
+            let altRoundBase = Math.floor(currentAltitude / 100) * 100;
+            
+            for (let a = altRoundBase - 500; a <= altRoundBase + 500; a += 100) {
+                let deltaY = (currentAltitude - a) * 0.35; 
+                let textY = middleY + deltaY;
+
+                ctx.fillStyle = "#ffffff";
+                ctx.fillText(a + " FT", startX + containerWidth - 35, textY);
+                
+                ctx.strokeStyle = "#00ff66";
+                ctx.beginPath();
+                ctx.moveTo(startX + 75, textY);
+                ctx.lineTo(startX + 85, textY);
+                ctx.stroke();
+            }
+
+            ctx.restore();
+
+            // Central Horizon Readout Overlay Boxes
+            ctx.lineWidth = 1;
+            ctx.fillStyle = "rgba(0, 20, 5, 0.95)";
+            ctx.strokeStyle = "#00ff66";
+            
+            // Left Speed Indicator read box
+            ctx.fillRect(startX + 4, middleY - 14, 60, 28);
+            ctx.strokeRect(startX + 4, middleY - 14, 60, 28);
+            ctx.fillStyle = "#00ff66";
+            ctx.font = "bold 15px 'Share Tech Mono', monospace";
+            ctx.fillText(Math.round(currentAirspeed), startX + 34, middleY);
+
+            // Right Altitude Indicator read box
+            ctx.fillStyle = "rgba(0, 20, 5, 0.95)";
+            ctx.fillRect(startX + containerWidth - 64, middleY - 14, 60, 28);
+            ctx.strokeRect(startX + containerWidth - 64, middleY - 14, 60, 28);
+            ctx.fillStyle = "#ffffff";
+            ctx.fillText(Math.round(currentAltitude), startX + containerWidth - 34, middleY);
+        }
+
         function drawCockpit() {
             const W = canvas.width;
             const H = canvas.height;
             const cx = W / 2;
             const cy = H / 2;
 
-            // Smooth airspeed calculation
+            // Airspeed calculation
             flight.airspeed += ((flight.throttle * 2.5) - flight.airspeed) * 0.03;
             
-            // Unlocked pitch physics (Climb / Dive)
-            flight.altitude += (flight.pitch * 0.25) * (flight.airspeed / 60);
+            // Pitch calculations
+            flight.altitude += (flight.pitch * 0.3) * (flight.airspeed / 60);
+            if (flight.altitude < -30) flight.altitude = -30; 
 
-            // NEW: True banking steering. Turning left/right shifts your actual world position X
-            // If you roll right (positive), worldLeftX increases, moving the map left
-            let turnRate = Math.sin(flight.roll * Math.PI / 180) * (flight.airspeed * 0.05);
-            worldLeftX += turnRate;
+            // Smooth heading tracking
+            if (flight.airspeed > 10) {
+                let turnFactor = Math.sin(flight.roll * Math.PI / 180) * 0.025;
+                flight.heading -= turnFactor; 
+            }
 
-            // Track forward movement depth
-            let speedFactor = flight.airspeed * 0.15;
-            worldForwardZ += speedFactor;
+            let step = flight.airspeed * 0.15;
+            posX -= Math.sin(flight.heading) * step;
+            posZ += Math.cos(flight.heading) * step;
 
-            // Sky background
+            // Atmosphere fill
             ctx.fillStyle = "#4ba3e3"; 
             ctx.fillRect(0, 0, W, H);
 
+            let snapBaseX = Math.floor(posX / spacing);
+            let snapBaseZ = Math.floor(posZ / spacing);
+            
+            let offsetX = posX % spacing;
+            let offsetZ = posZ % spacing;
+
+            let cosH = Math.cos(-flight.heading);
+            let sinH = Math.sin(-flight.heading);
+            let radR = -flight.roll * Math.PI / 180;
+            let cosR = Math.cos(radR);
+            let sinR = Math.sin(radR);
+            let pitchOffset = flight.pitch * 6;
+
+            const fov = 450;
+
             // -------------------------------------------------------------
-            // 3D PERSPECTIVE MESH LANDSCAPE ENGINE
+            // UNIFORM RETRO PROJECTION RENDERING SYSTEM
             // -------------------------------------------------------------
-            for (let r = gridRows - 2; r >= 0; r--) {
-                for (let c = 0; c < gridCols - 1; c++) {
+            for (let r = viewRows - 1; r >= -4; r--) { 
+                for (let c = -Math.floor(viewCols/2); c < Math.floor(viewCols/2); c++) {
                     
-                    // Base grid coordinates centered around the viewer
-                    let xIdx1 = c - (gridCols / 2);
-                    let xIdx2 = (c + 1) - (gridCols / 2);
+                    let localC1 = c;
+                    let localC2 = c + 1;
+                    let localR1 = r;
+                    let localR2 = r + 1;
+
+                    let absX1 = localC1 + snapBaseX;
+                    let absX2 = localC2 + snapBaseX;
+                    let absZ1 = localR1 + snapBaseZ;
+                    let absZ2 = localR2 + snapBaseZ;
+
+                    let wX1 = localC1 * spacing - offsetX;
+                    let wX2 = localC2 * spacing - offsetX;
+                    let wZ1 = localR1 * spacing - offsetZ;
+                    let wZ2 = localR2 * spacing - offsetZ;
+
+                    let rotTLz = wX1 * sinH + wZ1 * cosH;
+                    let rotTRz = wX2 * sinH + wZ1 * cosH;
+                    let rotBLz = wX1 * sinH + wZ2 * cosH;
+                    let rotBRz = wX2 * sinH + wZ2 * cosH;
+
+                    if (rotTLz < 15 || rotTRz < 15 || rotBLz < 15 || rotBRz < 15) continue;
+
+                    let rotTLx = wX1 * cosH - wZ1 * sinH;
+                    let rotTRx = wX2 * cosH - wZ1 * sinH;
+                    let rotBLx = wX1 * cosH - wZ2 * sinH;
+                    let rotBRx = wX2 * cosH - wZ2 * sinH;
+
+                    let hTL = getPreloadedElevation(absX1, absZ1);
+                    let hTR = getPreloadedElevation(absX2, absZ1);
+                    let hBL = getPreloadedElevation(absX1, absZ2);
+                    let hBR = getPreloadedElevation(absX2, absZ2);
                     
-                    let zRow1 = r;
-                    let zRow2 = r + 1;
+                    let pTL = { x: cx + rotTLx * (fov / rotTLz), y: cy + (flight.altitude - hTL) * (fov / rotTLz) };
+                    let pTR = { x: cx + rotTRx * (fov / rotTRz), y: cy + (flight.altitude - hTR) * (fov / rotTRz) };
+                    let pBL = { x: cx + rotBLx * (fov / rotBLz), y: cy + (flight.altitude - hBL) * (fov / rotBLz) };
+                    let pBR = { x: cx + rotBRx * (fov / rotBRz), y: cy + (flight.altitude - hBR) * (fov / rotBRz) };
 
-                    // Apply horizontal shifting to map calculations based on steering drift
-                    let wX1 = (xIdx1 * spacing) - (worldLeftX % spacing);
-                    let wX2 = (xIdx2 * spacing) - (worldLeftX % spacing);
-                    let wZ1 = (zRow1 * spacing) - (worldForwardZ % spacing);
-                    let wZ2 = (zRow2 * spacing) - (worldForwardZ % spacing);
+                    let minX = Math.min(pTL.x, pTR.x, pBL.x, pBR.x);
+                    let maxX = Math.max(pTL.x, pTR.x, pBL.x, pBR.x);
+                    if (maxX < -100 || minX > W + 100) continue;
 
-                    // Map grid calculations back to absolute matrix points to keep features stable
-                    let absX1 = xIdx1 + Math.floor(worldLeftX / spacing);
-                    let absX2 = xIdx2 + Math.floor(worldLeftX / spacing);
-                    let absZ1 = zRow1 + Math.floor(worldForwardZ / spacing);
-                    let absZ2 = zRow2 + Math.floor(worldForwardZ / spacing);
-
-                    // Sample elevations for the quad tile patch
-                    let hTL = getTerrainElevation(absX1, absZ1);
-                    let hTR = getTerrainElevation(absX2, absZ1);
-                    let hBL = getTerrainElevation(absX1, absZ2);
-                    let hBR = getTerrainElevation(absX2, absZ2);
-
-                    const fov = 400;
-                    
-                    // Project Corner 1: Top Left
-                    let s1 = fov / wZ1;
-                    let pTL = { x: cx + wX1 * s1, y: cy + (flight.altitude - hTL) * s1 };
-
-                    // Project Corner 2: Top Right
-                    let pTR = { x: cx + wX2 * s1, y: cy + (flight.altitude - hTR) * s1 };
-
-                    // Project Corner 3: Bottom Left
-                    let s2 = fov / wZ2;
-                    let pBL = { x: cx + wX1 * s2, y: cy + (flight.altitude - hBL) * s2 };
-
-                    // Project Corner 4: Bottom Right
-                    let pBR = { x: cx + wX2 * s2, y: cy + (flight.altitude - hBR) * s2 };
-
-                    // Apply camera roll translation parameters matrix
-                    let rad = -flight.roll * Math.PI / 180;
-                    let cosR = Math.cos(rad);
-                    let sinR = Math.sin(rad);
-                    let pitchOffset = flight.pitch * 6;
-
-                    function transform3D(pt) {
+                    function applyCockpitRoll(pt) {
                         let rx = (pt.x - cx) * cosR - (pt.y - cy) * sinR;
                         let ry = (pt.x - cx) * sinR + (pt.y - cy) * cosR;
                         return { x: cx + rx, y: cy + ry + pitchOffset };
                     }
 
-                    let tTL = transform3D(pTL);
-                    let tTR = transform3D(pTR);
-                    let tBL = transform3D(pBL);
-                    let tBR = transform3D(pBR);
-
-                    if (wZ1 <= 5 || wZ2 <= 5) continue;
+                    let tTL = applyCockpitRoll(pTL);
+                    let tTR = applyCockpitRoll(pTR);
+                    let tBL = applyCockpitRoll(pBL);
+                    let tBR = applyCockpitRoll(pBR);
 
                     let heightAvg = (hTL + hTR + hBL + hBR) / 4;
                     
-                    if (heightAvg <= 0) {
-                        ctx.fillStyle = (c + r) % 2 === 0 ? "#1d4ed8" : "#2563eb";
-                        ctx.strokeStyle = "rgba(29, 78, 216, 0.2)";
+                    if (heightAvg <= -35) {
+                        ctx.fillStyle = (absX1 + absZ1) % 2 === 0 ? "#1d4ed8" : "#2563eb";
+                        ctx.strokeStyle = "rgba(29, 78, 216, 0.1)";
                     } else {
-                        let greenShade = Math.floor(100 + (heightAvg * 0.7));
-                        greenShade = Math.max(40, Math.min(240, greenShade));
-                        ctx.fillStyle = `rgb(${25}, ${greenShade}, ${45})`;
-                        ctx.strokeStyle = `rgb(${15}, ${greenShade - 20}, ${35})`;
+                        let greenShade = Math.floor(95 + (heightAvg * 0.35));
+                        greenShade = Math.max(35, Math.min(230, greenShade));
+                        
+                        if (heightAvg > 240) {
+                            let snowVal = Math.min(255, Math.floor(160 + (heightAvg - 240)));
+                            ctx.fillStyle = `rgb(${snowVal}, ${snowVal}, ${snowVal})`;
+                            ctx.strokeStyle = `rgb(${snowVal - 20}, ${snowVal - 20}, ${snowVal - 20})`;
+                        } else {
+                            ctx.fillStyle = `rgb(${30}, ${greenShade}, ${55})`;
+                            ctx.strokeStyle = `rgb(${30}, ${greenShade}, ${55})`; 
+                        }
                     }
 
                     ctx.beginPath();
@@ -203,7 +336,7 @@
             }
 
             // -------------------------------------------------------------
-            // HUD Windshield Overlay
+            // HUD Center Reticle
             // -------------------------------------------------------------
             ctx.strokeStyle = "#00ff66";
             ctx.lineWidth = 2;
@@ -223,6 +356,9 @@
             ctx.moveTo(cx + 100, cy + 80); ctx.lineTo(cx + 70, cy + 80); ctx.lineTo(cx + 70, cy + 65);
             ctx.stroke();
 
+            // Render Right Side Flying Instruments Panel
+            drawFlightInstruments(ctx, W, H);
+
             hudThr.innerText = Math.round(flight.throttle) + "%";
             hudSpd.innerText = Math.round(flight.airspeed) + " KT";
             hudAlt.innerText = Math.round(flight.altitude) + " FT";
@@ -240,7 +376,6 @@
                     const data = JSON.parse(event.data);
                     flight.pitch = data.pitch;
                     flight.roll = data.roll;
-                    flight.heading = data.heading;
                     flight.throttle = data.throttle;
                 } catch (err) {}
             };
