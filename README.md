@@ -24,9 +24,9 @@ If you are reviewing this project without the Raspberry Pi hardware rig connecte
 
 | Control | Input Mechanism | Action |
 | :--- | :--- | :--- |
-| **Pitch (Nose Up/Down)** | `W` / `S` (or `Up` / `Down` Arrow Keys) | Pull up to climb or push down to dive |
-| **Roll (Bank Left/Right)** | `A` / `D` (or `Left` / `Right` Arrow Keys) | Bank the wings to change your aerodynamic heading |
-| **Throttle (Engine Power)** | `Mouse Scroll Wheel` or `E` / `Q` | Increase or decrease engine thrust ($0\% - 100\%$) |
+| **Pitch (Nose Up/Down)** | `W` / `S` | Pull up to climb or push down to dive |
+| **Roll (Bank Left/Right)** | `A` / `D` | Bank the wings to change your aerodynamic heading |
+| **Throttle (Engine Power)** | `Mouse Scroll Wheel` | Increase or decrease engine thrust ($0\% - 100\%$) |
 
 ---
 
