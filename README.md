@@ -41,4 +41,4 @@ The right-hand side of the viewport features a high-visibility, neon-styled digi
 ## 📦 Repository Structure
 
 * `index.html` — The complete frontend flight simulator application containing the Canvas matrix projection engine, UI overlays, and input listeners.
-* `telemetry_server.py` — *(Optional: Add your Python WebSocket server script here)* The script that runs on the Raspberry Pi 5 to poll the Sense HAT IMU data and broadcast telemetry packets.
+* `telemetry_server.py` — The backend of the flight simulator applciation, handling the data telemetry from the Raspberry Pi 5 to the game.
